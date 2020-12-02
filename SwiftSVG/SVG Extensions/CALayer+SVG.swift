@@ -94,7 +94,6 @@ public extension CALayer {
                 parserToUse = parser
             } else {
                 parserToUse = NSXMLSVGParser(svgData: svgData) { (svgLayer) in
-                    
                     DispatchQueue.global(qos: .userInitiated).async {
                         guard let layerCopy = svgLayer.svgLayerCopy else {
                             return
@@ -105,6 +104,7 @@ public extension CALayer {
                     DispatchQueue.main.safeAsync {
                         self?.addSublayer(svgLayer)
                     }
+					SVGPath.shouldEndParse = false
                     completion(svgLayer)
                 }
             }

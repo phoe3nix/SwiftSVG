@@ -61,7 +61,7 @@ final class SVGPath: SVGShapeElement, ParsesAsynchronously, DelaysApplyingAttrib
     /// :nodoc:
     internal var svgLayer = CAShapeLayer()
 
-	private static var shouldEndParse: Bool = false
+	internal static var shouldEndParse: Bool = false
     
     /// :nodoc:
     internal init() { }
