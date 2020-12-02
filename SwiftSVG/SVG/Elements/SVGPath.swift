@@ -60,6 +60,8 @@ final class SVGPath: SVGShapeElement, ParsesAsynchronously, DelaysApplyingAttrib
     
     /// :nodoc:
     internal var svgLayer = CAShapeLayer()
+
+	private var shouldEndParse: Bool = false
     
     /// :nodoc:
     internal init() { }
@@ -91,6 +93,7 @@ final class SVGPath: SVGShapeElement, ParsesAsynchronously, DelaysApplyingAttrib
                 var previousCommand: PreviousCommand? = nil
                 for thisPathCommand in PathDLexer(pathString: workingString) {
 					if !thisPathCommand.execute(on: pathDPath, previousCommand: previousCommand) {
+						self.shouldEndParse = true
 						self.asyncParseManager?.finishedProcessing(nil)
 					}
                     previousCommand = thisPathCommand
@@ -106,7 +109,9 @@ final class SVGPath: SVGShapeElement, ParsesAsynchronously, DelaysApplyingAttrib
                     guard var this = self else { return }
                     this.svgLayer.path = pathDPath.cgPath
                     this.applyDelayedAttributes()
-					this.asyncParseManager?.finishedProcessing(this.svgLayer)
+					if !this.shouldEndParse {
+						this.asyncParseManager?.finishedProcessing(this.svgLayer)
+					}
                 }
                 
             } else {
