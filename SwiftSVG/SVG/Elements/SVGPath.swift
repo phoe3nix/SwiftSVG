@@ -85,12 +85,15 @@ final class SVGPath: SVGShapeElement, ParsesAsynchronously, DelaysApplyingAttrib
         autoreleasepool { () -> () in
             
             let pathDPath = UIBezierPath()
+			var errorCount: Int = 0
             pathDPath.move(to: CGPoint.zero)
 
             let parsePathClosure = {
                 var previousCommand: PreviousCommand? = nil
                 for thisPathCommand in PathDLexer(pathString: workingString) {
-                    thisPathCommand.execute(on: pathDPath, previousCommand: previousCommand)
+					if !thisPathCommand.execute(on: pathDPath, previousCommand: previousCommand) {
+						errorCount += 1
+					}
                     previousCommand = thisPathCommand
                 }
             }
@@ -104,7 +107,11 @@ final class SVGPath: SVGShapeElement, ParsesAsynchronously, DelaysApplyingAttrib
                     guard var this = self else { return }
                     this.svgLayer.path = pathDPath.cgPath
                     this.applyDelayedAttributes()
-                    this.asyncParseManager?.finishedProcessing(this.svgLayer)
+					if errorCount != 0 {
+						this.asyncParseManager?.finishedProcessing(nil)
+					} else {
+						this.asyncParseManager?.finishedProcessing(this.svgLayer)
+					}
                 }
                 
             } else {

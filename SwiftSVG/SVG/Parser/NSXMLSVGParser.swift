@@ -259,18 +259,22 @@ extension NSXMLSVGParser: CanManageAsychronousParsing {
     /**
      The `CanManageAsychronousParsing` callback called when an `ParsesAsynchronously` element has finished parsing
      */
-    func finishedProcessing(_ shapeLayer: CAShapeLayer) {
+    func finishedProcessing(_ shapeLayer: CAShapeLayer?) {
         
         self.asyncCountQueue.sync {
             self.asyncParseCount -= 1
         }
         
-        self.resizeContainerBoundingBox(shapeLayer.path?.boundingBox)
+		self.resizeContainerBoundingBox(shapeLayer?.path?.boundingBox)
         
         guard self.asyncParseCount <= 0 && self.didDispatchAllElements else {
             return
         }
         DispatchQueue.main.safeAsync {
+			if shapeLayer == nil {
+				self.completionBlock = nil
+				return
+			}
             self.completionBlock?(self.containerLayer)
             self.completionBlock = nil
         }
